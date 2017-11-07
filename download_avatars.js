@@ -1,27 +1,31 @@
-var request = require('request');
-
-var secret = require('./secret.js');
-
-var fs = require('fs');
+const request = require('request');
+const secret = require('./secret.js');
+const fs = require('fs');
 
 console.log('Welcome to the GitHub Avatar Downloader!');
 
-var repoOwner = process.argv[2];
-var repoName = process.argv[3];
+const isRequired = () => {throw error('parameter is required'); };
+const repoOwner = process.argv[2];
+const repoName = process.argv[3];
+const checkerOwner = process.argv.slice(2);
+const checkerName = process.argv.slice(3);
 
 function getRepoContributors(repoOwner, repoName, cb) {
-  var options = {
-    url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
-    headers: {
-      'User-Agent': 'request',
-      'Authorization': "token " + secret.GITHUB_TOKEN
-    }
+  if (checkerOwner.length === 0 || checkerName.length === 0) {
+    console.log("You forgot either the username or the repo name. Try again.");
+  } else {
+    const options = {
+      url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
+      headers: {
+        'User-Agent': 'request',
+        'Authorization': "token " + secret.GITHUB_TOKEN
+      }
+    };
+    request(options, function(err, res, body) {
+      const obj = JSON.parse(body);
+      cb(obj);
+    });
   };
-  request(options, function(err, res, body) {
-    const obj = JSON.parse(body);
-    //console.log(obj);
-    cb(obj);
-  });
 }
 
 function downloadImageByURL(url, filePath) {
@@ -30,9 +34,6 @@ function downloadImageByURL(url, filePath) {
          throw err;
        })
        .on('response', function (response) {
-         //console.log('Response Status Code: ', response.statusCode);
-         //console.log('downloading...');
-         //console.log('downloaded');
        })
        .pipe(fs.createWriteStream(filePath))
 }
@@ -41,7 +42,7 @@ getRepoContributors(repoOwner, repoName, (obj) => {
   obj.forEach((function(obj) {
     downloadImageByURL(obj["avatar_url"], "avatars/"+obj["login"]+".jpg");
   }));
-  console.log('Avatars have been downloaded.');
+  console.log('Avatars have been downloaded. Check the avatars folder!');
 });
 
 
