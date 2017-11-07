@@ -1,11 +1,26 @@
 var request = require('request');
 
+var GITHUB_TOKEN = require('./secret.js');
+
 console.log('Welcome to the GitHub Avatar Downloader!');
-var fs = require('fs');
 
-var userAndRepo = process.argv.slice[2];
+function getRepoContributors(repoOwner, repoName, cb) {
+  var options = {
+    url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
+    headers: {
+      'User-Agent': 'request',
+      'Authentication': GITHUB_TOKEN
+    }
+  };
 
-// the URL should be https://github.com/[USER]/[REPONAME]/graphs/contributors
+  request(options, function(err, res, body) {
+    cb(err, body);
+  });
+}
 
-// create new directory "AVATARS"
-// each img should be named USERNAME.png
+getRepoContributors("jquery", "jquery", function(err, result) {
+  console.log("Errors:", err);
+  console.log("Result:", result);
+});
+
+
