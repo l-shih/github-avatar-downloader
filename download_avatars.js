@@ -30,23 +30,18 @@ function downloadImageByURL(url, filePath) {
          throw err;
        })
        .on('response', function (response) {
-         console.log('Response Status Code: ', response.statusCode);
-         console.log('downloading...');
+         //console.log('Response Status Code: ', response.statusCode);
+         //console.log('downloading...');
          //console.log('downloaded');
        })
        .pipe(fs.createWriteStream(filePath))
-       .on('end', function() {
-        console.log('complete');
-       })
-
 }
 
-downloadImageByURL("https://avatars2.githubusercontent.com/u/2741?v=3&s=466", "./avatars/kvirani.jpg")
-
-// getRepoContributors(repoOwner, repoName, (obj) => {
-//   obj.forEach((function(obj) {
-//     console.log(obj["avatar_url"]);
-//   }));
-// });
+getRepoContributors(repoOwner, repoName, (obj) => {
+  obj.forEach((function(obj) {
+    downloadImageByURL(obj["avatar_url"], "avatars/"+obj["login"]+".jpg");
+  }));
+  console.log('Avatars have been downloaded.');
+});
 
 
